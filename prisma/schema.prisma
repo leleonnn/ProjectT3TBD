@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model author {
+  AuthorID   Int     @id
+  AuthorName String  @db.VarChar(15)
+  YearBorn   Int
+  YearDied   Int?
+  wrote      wrote[]
+}
+
+model book {
+  BookID          Int         @id
+  BookName        String      @db.VarChar(25)
+  PublicationYear Int
+  Pages           Int
+  bought          bought[]
+  located         located[]
+  published       published[]
+  unloaded        unloaded[]
+  wrote           wrote[]
+}
+
+model bought {
+  BookID     Int
+  CustomerID Int
+  book       book     @relation(fields: [BookID], references: [BookID], onDelete: NoAction, onUpdate: NoAction, map: "BookID")
+  customer   customer @relation(fields: [CustomerID], references: [CustomerID], onDelete: NoAction, onUpdate: NoAction, map: "CustomerID")
+
+  @@id([CustomerID, BookID])
+}
+
+model customer {
+  CustomerID   Int      @id
+  CustomerName String   @db.VarChar(15)
+  Street       String   @db.VarChar(25)
+  City         String   @db.VarChar(10)
+  State        String   @db.VarChar(10)
+  Country      String   @db.VarChar(10)
+  bought       bought[]
+}
+
+model located {
+  BookID  Int
+  ShelfID Int
+  book    book  @relation(fields: [BookID], references: [BookID], onDelete: NoAction, onUpdate: NoAction, map: "BookID")
+  shelf   shelf @relation(fields: [ShelfID], references: [ShelfID], onDelete: NoAction, onUpdate: NoAction, map: "ShelfID")
+
+  @@id([ShelfID, BookID])
+}
+
+model published {
+  PublisherID Int
+  BookID      Int
+  book        book      @relation(fields: [BookID], references: [BookID], onDelete: NoAction, onUpdate: NoAction, map: "BookID")
+  publisher   publisher @relation(fields: [PublisherID], references: [PublisherID], onDelete: NoAction, onUpdate: NoAction, map: "PublisherID")
+
+  @@id([BookID, PublisherID])
+}
+
+model publisher {
+  PublisherID   Int         @id
+  PublisherName String      @db.VarChar(15)
+  City          String      @db.VarChar(10)
+  Country       String      @db.VarChar(10)
+  Telephone     String      @db.VarChar(10)
+  YearFounded   Int
+  published     published[]
+}
+
+model shelf {
+  ShelfID      Int       @id
+  CategoryName String    @db.VarChar(10)
+  located      located[]
+}
+
+model truck {
+  TruckID    Int        @id
+  DriverName String     @db.VarChar(15)
+  unloaded   unloaded[]
+}
+
+model unloaded {
+  BookID  Int
+  TruckID Int
+  book    book  @relation(fields: [BookID], references: [BookID], onDelete: NoAction, onUpdate: NoAction, map: "BookID")
+  truck   truck @relation(fields: [TruckID], references: [TruckID], onDelete: NoAction, onUpdate: NoAction, map: "TruckID")
+
+  @@id([TruckID, BookID])
+}
+
+model wrote {
+  BookID   Int
+  AuthorID Int
+  author   author @relation(fields: [AuthorID], references: [AuthorID], onDelete: NoAction, onUpdate: NoAction, map: "AuthorID")
+  book     book   @relation(fields: [BookID], references: [BookID], onDelete: NoAction, onUpdate: NoAction, map: "BookID")
+
+  @@id([AuthorID, BookID])
+}
